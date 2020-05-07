@@ -1,7 +1,7 @@
 class Card:
-    POSSIBLE_VALUES = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, None)
-    POSSIBLE_COLORS = ("RED", "BLUE", "YELLOW", "GREEN", None)
-    POSSIBLE_SPECIALS = ("REVERSE", "SKIP", "DRAW 2", "WILD", "WILD DRAW 4", None)
+    POSSIBLE_VALUES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, None]
+    POSSIBLE_COLORS = ["RED", "BLUE", "YELLOW", "GREEN", None]
+    POSSIBLE_SPECIALS = ["REVERSE", "SKIP", "DRAW 2", "WILD", "WILD DRAW 4", None]
 
     def __init__(self, value=None, color=None, special=None):
         """Initialize Card object
@@ -62,7 +62,7 @@ class Card:
             raise ValueError(f"{color} is not a valid color.")
         if special not in Card.POSSIBLE_SPECIALS:
             raise ValueError(f"{special} is not a valid special.")
-        if color and (not value and not special):
+        if color and (value is None and not special):
             raise ValueError(f"You cannot have a card with a color but no value or special.")
         if not value and not special and not color:
             raise ValueError(f"Empty card.")
@@ -259,5 +259,4 @@ class Card:
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-
 
