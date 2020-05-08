@@ -28,7 +28,7 @@ def prBlack(skk, end='\n'): print("\033[98m {}\033[00m".format(skk), end=end)
 
 
 class Game:
-    COMPUTER_THINK_TIME = 2
+    COMPUTER_THINK_TIME = 0.25
 
     def __init__(self, playerCount=2, cardAmount=7, gameRotation=1):
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
@@ -147,20 +147,24 @@ class Game:
             else:
                 while colorChoice not in Card.POSSIBLE_COLORS[:-1]:
                     colorChoice = input("What color would you like? Type>>").upper()
+
             self.currentCard.set_color(colorChoice)
+
         elif card.get_special() == "REVERSE":
             self.switch_game_rotation()
+            print(self.gameRotation)
         elif card.get_special() == "SKIP":
             self.get_next_player()
 
     def get_computer_move(self):
         print(f"Player {self.playerTurn} is thinking...")
+        playerIndex = self.playerTurn
         time.sleep(Game.COMPUTER_THINK_TIME)
         computerCards = self.playerCards[self.playerTurn]
         for card in computerCards:
             if self.validate_move(card):
                 self.parse_move(card)
-                print(f"Player {self.playerTurn} has thrown {card} and now has {len(computerCards)} cards.")
+                print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards.")
                 return
         self.playerCards[self.playerTurn].append(Game.draw_card())
         print(f"Player {self.playerTurn} has drawn a card and now has {len(computerCards)} cards.")
@@ -191,9 +195,9 @@ class Game:
 
     def switch_game_rotation(self):
         if self.gameRotation == 1:
-            self.gameRotation = 0
-        else:
             self.gameRotation = -1
+        else:
+            self.gameRotation = 1
 
     def get_next_player(self):
         if self.gameRotation == 1:
@@ -228,6 +232,17 @@ class Game:
                 self.get_computer_move()
 
             self.get_next_player()
+            if self.currentCard.get_special() is not None:
+                if "DRAW 4" in self.currentCard.get_special():
+                    cardsToGive = 4
+                    self.playerCards[self.playerTurn] += self.draw_cards(cardsToGive)
+                    prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
+
+                elif "DRAW 2" in self.currentCard.get_special():
+                    cardsToGive = 2
+                    self.playerCards[self.playerTurn] += self.draw_cards(cardsToGive)
+                    prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
+
             self.print_current_card()
             time.sleep(Game.COMPUTER_THINK_TIME)
 
@@ -242,5 +257,5 @@ class Game:
                 self.restart_game()
 
 
-g = Game(playerCount=2, cardAmount=3)
+g = Game(playerCount=2, cardAmount=10)
 g.start_game()
