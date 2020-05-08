@@ -28,7 +28,7 @@ def prBlack(skk, end='\n'): print("\033[98m {}\033[00m".format(skk), end=end)
 
 
 class Game:
-    COMPUTER_THINK_TIME = 0.25
+    COMPUTER_THINK_TIME = 0
 
     def __init__(self, playerCount=2, cardAmount=7, gameRotation=1):
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
@@ -151,8 +151,10 @@ class Game:
             self.currentCard.set_color(colorChoice)
 
         elif card.get_special() == "REVERSE":
-            self.switch_game_rotation()
-            print(self.gameRotation)
+            if self.playerCount > 2:
+                self.switch_game_rotation()
+            else:
+                self.get_next_player()
         elif card.get_special() == "SKIP":
             self.get_next_player()
 
@@ -164,12 +166,15 @@ class Game:
         for card in computerCards:
             if self.validate_move(card):
                 self.parse_move(card)
+                if len(self.playerCards[playerIndex]) == 1:
+                    print(f"Player {playerIndex} says UNO!")
                 print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards.")
                 return
         self.playerCards[self.playerTurn].append(Game.draw_card())
         print(f"Player {self.playerTurn} has drawn a card and now has {len(computerCards)} cards.")
 
     def get_player_move(self):
+        playerIndex = self.playerTurn
         while True:
             cardExists = False
             self.print_player_cards()
@@ -185,6 +190,8 @@ class Game:
                     print(card)
                     if self.validate_move(card):
                         self.parse_move(card, cpu=False)
+                        if len(self.playerCards[playerIndex]) == 1:
+                            prBlack(f"You said UNO!")
                         print(f"You have thrown {card}.")
                         return
                     else:
@@ -257,5 +264,5 @@ class Game:
                 self.restart_game()
 
 
-g = Game(playerCount=2, cardAmount=10)
+g = Game(playerCount=5, cardAmount=10)
 g.start_game()
