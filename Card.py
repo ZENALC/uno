@@ -5,10 +5,6 @@ class Card:
 
     def __init__(self, value=None, color=None, special=None):
         """Initialize Card object
-        >>> Card(None, "RED", "WILD")
-        Traceback (most recent call last):
-        ...
-        ValueError: WILD cards cannot have a color.
         >>> Card(9, None, "WILD DRAW 4")
         Traceback (most recent call last):
         ...
@@ -49,8 +45,6 @@ class Card:
         if special == "WILD" or special == "WILD DRAW 4":
             if value:
                 raise ValueError("WILD cards cannot have a value.")
-            elif color:
-                raise ValueError("WILD cards cannot have a color.")
         elif special is not None:
             if value:
                 raise ValueError("You cannot have a special card with a value.")
@@ -160,19 +154,12 @@ class Card:
         >>> card3.set_color("BLUE")
         >>> card3.get_color()
         'BLUE'
-        >>> card4 = Card(None, None, "WILD")
-        >>> card4.set_color("BLUE")
-        Traceback (most recent call last):
-        ...
-        ValueError: You cannot set a color to a WILD card.
         >>> card5 = Card(3, "GREEN")
         >>> card5.set_color("PURPLE")
         Traceback (most recent call last):
         ...
         ValueError: PURPLE is not a valid color.
         """
-        if self.special == "WILD" or self.special == "WILD DRAW 4":
-            raise ValueError("You cannot set a color to a WILD card.")
 
         color = color if color is None else color.upper()
         if color in Card.POSSIBLE_COLORS:
