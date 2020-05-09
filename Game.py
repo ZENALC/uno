@@ -1,36 +1,12 @@
 import random
 import time
 from Card import Card
-
-
-def prRed(skk, end='\n'): print("\033[91m {}\033[00m".format(skk), end=end)
-
-
-def prGreen(skk, end='\n'): print("\033[92m {}\033[00m".format(skk), end=end)
-
-
-def prYellow(skk, end='\n'): print("\033[93m {}\033[00m".format(skk), end=end)
-
-
-def prLightPurple(skk, end='\n'): print("\033[94m {}\033[00m".format(skk), end=end)
-
-
-def prPurple(skk, end='\n'): print("\033[95m {}\033[00m".format(skk), end=end)
-
-
-def prCyan(skk, end='\n'): print("\033[96m {}\033[00m".format(skk), end=end)
-
-
-def prLightGray(skk, end='\n'): print("\033[97m {}\033[00m".format(skk), end=end)
-
-
-def prBlack(skk, end='\n'): print("\033[98m {}\033[00m".format(skk), end=end)
+from ColorPrint import *
 
 
 class Game:
-    COMPUTER_THINK_TIME = 0
-
-    def __init__(self, playerCount=2, cardAmount=7, gameRotation=1):
+    def __init__(self, playerCount=2, cardAmount=7, gameRotation=1, computerThinkTime=1):
+        self.computerThinkTime = computerThinkTime
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
         self.currentCard = None
         self.playerCount = playerCount
@@ -76,9 +52,9 @@ class Game:
     @staticmethod
     def draw_card():
         turnout = random.randint(0, 15)
-        possibleColors = Card.POSSIBLE_COLORS[:-1]
-        possibleValues = Card.POSSIBLE_VALUES[:-1]
-        possibleSpecials = Card.POSSIBLE_SPECIALS[:-3]
+        possibleColors = Card.POSSIBLE_COLORS[:-1]  # -1 because the last possible color is None
+        possibleValues = Card.POSSIBLE_VALUES[:-1]  # -1 because the last possible value is None
+        possibleSpecials = Card.POSSIBLE_SPECIALS[:-3]  # -3 because the last three are None, WILD, and WILD DRAW 4
 
         if turnout == 15:
             return Card(special="WILD DRAW 4")
@@ -161,7 +137,7 @@ class Game:
     def get_computer_move(self):
         print(f"Player {self.playerTurn} is thinking...")
         playerIndex = self.playerTurn
-        time.sleep(Game.COMPUTER_THINK_TIME)
+        time.sleep(self.computerThinkTime)
         computerCards = self.playerCards[self.playerTurn]
         for card in computerCards:
             if self.validate_move(card):
@@ -221,10 +197,10 @@ class Game:
     def start_game(self):
         print(f"Players playing: {self.playerCount}")
         print("Shuffling cards...")
-        time.sleep(Game.COMPUTER_THINK_TIME)
+        time.sleep(self.computerThinkTime)
 
         print("Drawing cards...")
-        time.sleep(Game.COMPUTER_THINK_TIME)
+        time.sleep(self.computerThinkTime)
 
         print(f"\nEach player has been given {self.cardAmount} cards.")
         print(f"Player {self.playerTurn} will start the game.")
@@ -251,7 +227,7 @@ class Game:
                     prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
 
             self.print_current_card()
-            time.sleep(Game.COMPUTER_THINK_TIME)
+            time.sleep(self.computerThinkTime)
 
         self.wins[self.game_over()] += 1
         self.print_score()
@@ -260,7 +236,7 @@ class Game:
             playAgain = input("Would you like to play again? 'Y' or 'N'>>")[0].upper()
             if playAgain == 'Y':
                 print("Restarting game...")
-                time.sleep(Game.COMPUTER_THINK_TIME)
+                time.sleep(self.computerThinkTime)
                 self.restart_game()
 
 
