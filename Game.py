@@ -8,6 +8,7 @@ class Game:
     def __init__(self, playerCount=2, cardAmount=7, gameRotation=1, computerThinkTime=1):
         self.computerThinkTime = computerThinkTime
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
+        self.newGame = True
         self.currentCard = None
         self.playerCount = playerCount
         self.wins = [0] * playerCount
@@ -18,6 +19,7 @@ class Game:
     def restart_game(self):
         self.playerCards = [Game.draw_cards(self.cardAmount) for _ in range(self.playerCount)]
         self.playerTurn = random.randint(0, self.playerCount - 1)
+        self.newGame = True
         self.start_game()
 
     def validate_move(self, card: Card):
@@ -102,7 +104,11 @@ class Game:
         print()
 
     def print_current_card(self):
-        output = f"\nThe current card is {self.currentCard}.\n"
+        if self.newGame:
+            output = f"\nThe first card is {self.currentCard}.\n"
+            self.newGame = False
+        else:
+            output = f"\nThe current card is {self.currentCard}.\n"
         if self.currentCard.get_color() is not None:
             if self.currentCard.get_color() == "GREEN":
                 prGreen(output)
