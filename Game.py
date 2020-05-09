@@ -5,7 +5,7 @@ from ColorPrint import *
 
 
 class Game:
-    def __init__(self, playerCount=2, cardAmount=7, gameRotation=1, computerThinkTime=1):
+    def __init__(self, playerCount=2, cardAmount=7, gameRotation=1, computerThinkTime=1.0):
         self.computerThinkTime = computerThinkTime
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
         self.newGame = True
@@ -39,8 +39,15 @@ class Game:
             return False
 
     def print_score(self):
+        prRed("\nCurrent game stats:\n")
         for playerIndex in range(self.playerCount):
             print(f"Player {playerIndex} has {self.wins[playerIndex]} wins.")
+
+    def print_winner(self):
+        if self.game_over() != 0:
+            print(f"{self.playerTurn} has won the game!")
+        else:
+            print(f"You have won the game!")
 
     def game_over(self):
         for playerCards in self.playerCards:
@@ -89,7 +96,11 @@ class Game:
         self.currentCard = firstCard
 
     def print_player_cards(self):
-        print(f"Your {len(self.playerCards[0])} cards are:")
+        numberOfCards = len(self.playerCards[0])
+        if numberOfCards > 1:
+            print(f"Your {len(self.playerCards[0])} cards are:")
+        else:
+            print("Your last card is:")
         for card in self.playerCards[0]:
             if card.get_color() == "GREEN":
                 prGreen(card, end=" | ")
@@ -169,7 +180,6 @@ class Game:
             for card in self.playerCards[0]:
                 if throwCard in str(card):
                     cardExists = True
-                    print(card)
                     if self.validate_move(card):
                         self.parse_move(card, cpu=False)
                         if len(self.playerCards[playerIndex]) == 1:
@@ -200,20 +210,45 @@ class Game:
             else:
                 self.playerTurn -= 1
 
-    def start_game(self):
+    def startup(self):
         print(f"Players playing: {self.playerCount}")
         print("Shuffling cards...")
+        time.sleep(self.computerThinkTime)
+
+        if self.playerCount > 1:
+            print("Flipping coins to decide who will start the game...")
         time.sleep(self.computerThinkTime)
 
         print("Drawing cards...")
         time.sleep(self.computerThinkTime)
 
-        print(f"\nEach player has been given {self.cardAmount} cards.")
-        print(f"Player {self.playerTurn} will start the game.")
+        if self.cardAmount > 1:
+            print(f"\nEach player has been given {self.cardAmount} card(s).")
+        else:
+            print(f"\nEach player has been given {self.cardAmount} card.")
+
+        if self.playerTurn != 0:
+            print(f"Player {self.playerTurn} will start the game.")
+        else:
+            print(f"You will start the game.")
 
         self.get_first_card()
         self.print_current_card()
 
+    def parse_draw_card(self):
+        if "DRAW 4" in self.currentCard.get_special():
+            cardsToGive = 4
+        else:
+            cardsToGive = 2
+
+        self.playerCards[self.playerTurn] += self.draw_cards(cardsToGive)
+        if self.playerTurn == 0:
+            prRed(f"You have been given {cardsToGive} cards.")
+        else:
+            prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
+
+    def start_game(self):
+        self.startup()
         while self.game_over() is None:
             if self.playerTurn == 0:
                 self.get_player_move()
@@ -221,20 +256,13 @@ class Game:
                 self.get_computer_move()
 
             self.get_next_player()
-            if self.currentCard.get_special() is not None:
-                if "DRAW 4" in self.currentCard.get_special():
-                    cardsToGive = 4
-                    self.playerCards[self.playerTurn] += self.draw_cards(cardsToGive)
-                    prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
-
-                elif "DRAW 2" in self.currentCard.get_special():
-                    cardsToGive = 2
-                    self.playerCards[self.playerTurn] += self.draw_cards(cardsToGive)
-                    prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
+            if self.currentCard.get_special() is not None and "DRAW" in self.currentCard.get_special():
+                self.parse_draw_card()
 
             self.print_current_card()
             time.sleep(self.computerThinkTime)
 
+        self.print_winner()
         self.wins[self.game_over()] += 1
         self.print_score()
         playAgain = None
@@ -246,5 +274,5 @@ class Game:
                 self.restart_game()
 
 
-g = Game(playerCount=5, cardAmount=10)
+g = Game(playerCount=2, cardAmount=7, computerThinkTime=2)
 g.start_game()
