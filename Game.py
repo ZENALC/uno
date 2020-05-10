@@ -45,7 +45,7 @@ class Game:
 
     def print_winner(self):
         if self.game_over() != 0:
-            print(f"{self.playerTurn} has won the game!")
+            print(f"Player {self.game_over()} has won the game!")
         else:
             print(f"You have won the game!")
 
@@ -277,5 +277,5 @@ class Game:
                 self.restart_game()
 
 
-g = Game(playerCount=2, cardAmount=7, computerThinkTime=0.25)
+g = Game(playerCount=3, cardAmount=1, computerThinkTime=0.75)
 g.start_game()
