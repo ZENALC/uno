@@ -1,3 +1,4 @@
+import os
 import random
 import time
 from Card import Card
@@ -6,8 +7,10 @@ from ColorPrint import *
 
 class Game:
     def __init__(self, playerCount=2, cardAmount=7, gameRotation=1, computerThinkTime=1.0):
+        self.highScoreFilename = "high_score.txt"
         self.computerThinkTime = computerThinkTime
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
+        self.highScore = self.read_high_score()  # read high-score if file exists
         self.newGame = True
         self.currentCard = None
         self.playerCount = playerCount
@@ -114,6 +117,18 @@ class Game:
                 prPurple(card, end=" | ")
         print()
 
+    def save_high_score(self):
+        if self.highScore is None or self.wins[0] > self.highScore:
+            print("New high score found! Congratulations!")
+            with open(self.highScoreFilename, 'w') as f:
+                f.write("Highest score is: {}".format(str(self.wins[0])))
+
+    def read_high_score(self):
+        if os.path.exists(self.highScoreFilename):
+            with open(self.highScoreFilename, 'r') as f:
+                return int(f.read())
+        return None
+
     def print_current_card(self):
         if self.newGame:
             output = f"\nThe first card is {self.currentCard}.\n"
@@ -171,7 +186,8 @@ class Game:
         while True:
             cardExists = False
             self.print_player_cards()
-            throwCard = " ".join(input("It is your turn. Type a card to throw or 'DRAW' to draw a card>>").upper().split())
+            throwCard = " ".join(
+                input("It is your turn. Type a card to throw or 'DRAW' to draw a card>>").upper().split())
             if throwCard == "DRAW":
                 drawnCard = self.draw_card()
                 self.playerCards[self.playerTurn].append(drawnCard)
@@ -264,7 +280,7 @@ class Game:
 
             self.print_current_card()
             time.sleep(self.computerThinkTime)
-
+        self.save_high_score()
         self.print_winner()
         self.wins[self.game_over()] += 1
         self.print_score()
