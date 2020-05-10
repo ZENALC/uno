@@ -171,7 +171,7 @@ class Game:
         while True:
             cardExists = False
             self.print_player_cards()
-            throwCard = input("It is your turn. Type a card to throw or 'DRAW' to draw a card>>").upper()
+            throwCard = " ".join(input("It is your turn. Type a card to throw or 'DRAW' to draw a card>>").upper().split())
             if throwCard == "DRAW":
                 drawnCard = self.draw_card()
                 self.playerCards[self.playerTurn].append(drawnCard)
@@ -180,6 +180,9 @@ class Game:
             for card in self.playerCards[0]:
                 if throwCard in str(card):
                     cardExists = True
+                    if throwCard == "WILD" and card.get_special() != "WILD":
+                        cardExists = False
+                        continue
                     if self.validate_move(card):
                         self.parse_move(card, cpu=False)
                         if len(self.playerCards[playerIndex]) == 1:
@@ -274,5 +277,5 @@ class Game:
                 self.restart_game()
 
 
-g = Game(playerCount=2, cardAmount=7, computerThinkTime=2)
+g = Game(playerCount=1, cardAmount=20, computerThinkTime=0)
 g.start_game()
