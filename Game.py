@@ -139,7 +139,7 @@ class Game:
                 colorChoice = random.choice(Card.POSSIBLE_COLORS[:-1])
             else:
                 while colorChoice not in Card.POSSIBLE_COLORS[:-1]:
-                    colorChoice = input("What color would you like? Type>>").upper()
+                    colorChoice = input("What color would you like? Type>>").upper().strip()
 
             self.currentCard.set_color(colorChoice)
 
@@ -270,12 +270,12 @@ class Game:
         self.print_score()
         playAgain = None
         while playAgain not in ['Y', 'N']:
-            playAgain = input("Would you like to play again? 'Y' or 'N'>>")[0].upper()
+            playAgain = input("Would you like to play again? 'Y' or 'N'>>")[0].upper().strip()
             if playAgain == 'Y':
                 print("Restarting game...")
                 time.sleep(self.computerThinkTime)
                 self.restart_game()
 
 
-g = Game(playerCount=1, cardAmount=20, computerThinkTime=0)
+g = Game(playerCount=2, cardAmount=7, computerThinkTime=0.25)
 g.start_game()
