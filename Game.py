@@ -137,6 +137,20 @@ class Game:
                 return high_score
         return None
 
+    def get_most_available_color(self):
+        colorScores = {"blue": 0, "green": 0, "red": 0, "yellow": 0}
+        for card in self.playerCards[self.playerTurn]:
+            if card.get_color() == "BLUE":
+                colorScores["blue"] += 1
+            elif card.get_color() == "GREEN":
+                colorScores["green"] += 1
+            elif card.get_color() == "RED":
+                colorScores["red"] += 1
+            elif card.get_color() == "YELLOW":
+                colorScores["yellow"] += 1
+
+        return max(colorScores.items(), key=lambda k: k[1])[0]
+
     def print_current_card(self):
         if self.newGame:
             output = f"\nThe first card is {self.currentCard}.\n"
@@ -159,7 +173,9 @@ class Game:
         if card.get_special() == "WILD" or card.get_special() == "WILD DRAW 4":
             colorChoice = None
             if cpu:
-                colorChoice = random.choice(Card.POSSIBLE_COLORS[:-1])
+                colorChoice = self.get_most_available_color()
+                print(colorChoice)
+                # colorChoice = random.choice(Card.POSSIBLE_COLORS[:-1])
             else:
                 while colorChoice not in Card.POSSIBLE_COLORS[:-1]:
                     colorChoice = input("What color would you like? Type>>").upper().strip()
@@ -301,5 +317,5 @@ class Game:
                 self.restart_game()
 
 
-g = Game(playerCount=2, cardAmount=1, computerThinkTime=0)
+g = Game(playerCount=2, cardAmount=5, computerThinkTime=0)
 g.start_game()
