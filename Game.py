@@ -191,8 +191,10 @@ class Game:
             if self.validate_move(card):
                 self.parse_move(card)
                 if len(self.playerCards[playerIndex]) == 1:
-                    prRed(f"Player {playerIndex} says UNO!")
-                self.color_print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} card(s).")
+                    self.color_print(f"Player {playerIndex} says UNO!")
+                    self.color_print(f"Player {playerIndex} has thrown {card} and now has 1 card left.")
+                else:
+                    self.color_print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards left.")
                 return
         self.playerCards[self.playerTurn].append(Game.draw_card())
         print(f"Player {self.playerTurn} has drawn a card and now has {len(computerCards)} cards.")
@@ -211,6 +213,8 @@ class Game:
                 self.playerCards[self.playerTurn].append(drawnCard)
                 print(f"You have drawn {drawnCard}.")
                 return
+            elif playerInput == '':
+                continue
             elif playerInput == "PRINT":
                 self.print_current_card()
             elif playerInput == "HELP":
@@ -309,11 +313,14 @@ class Game:
         self.print_score()
         playAgain = None
         while playAgain not in ['Y', 'N']:
-            playAgain = input("Would you like to play again? 'Y' or 'N'>>")[0].upper().strip()
-            if playAgain == 'Y':
-                print("Restarting game...")
-                time.sleep(self.computerThinkTime)
-                self.restart_game()
+            try:
+                playAgain = input("Would you like to play again? 'Y' or 'N'>>")[0].upper().strip()
+                if playAgain == 'Y':
+                    print("Restarting game...")
+                    time.sleep(self.computerThinkTime)
+                    self.restart_game()
+            except IndexError:
+                continue
 
     def restart_game(self):
         self.playerCards = [Game.draw_cards(self.cardAmount) for _ in range(self.playerCount)]
@@ -342,5 +349,5 @@ class Game:
         prRed("Those are all the rules. Good luck!\n\n")
 
 
-g = Game(playerCount=3, cardAmount=7, computerThinkTime=0.9)
+g = Game(playerCount=3, cardAmount=2, computerThinkTime=0.9)
 g.start_game()
