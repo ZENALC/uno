@@ -7,34 +7,40 @@ from ColorPrint import *
 
 class Game:
     def __init__(self, playerCount=2, cardAmount=7, gameRotation=1, computerThinkTime=1.0):
-        self.highScoreFilename = "high_score.txt"
-        self.computerThinkTime = computerThinkTime
+        self.highScoreFilename = "high_score.txt"  # default file name that contains high score
+        self.computerThinkTime = computerThinkTime  # default time.sleep() time to simulate computer thinking
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
         self.highScore = self.read_high_score()  # read high-score if file exists
-        self.beatOldHighScore = False
-        self.newGame = True
-        self.currentCard = None
-        self.playerCount = playerCount
-        self.wins = [0] * playerCount
-        self.cardAmount = cardAmount
+        self.beatOldHighScore = False  # boolean to check if high score has beaten in this game instance
+        self.newGame = True  # boolean to check if it is a new game
+        self.currentCard = None  # current card being played
+        self.playerCount = playerCount  # number of players playing the game
+        self.wins = [0] * playerCount  # scores for each individual player in the game
+        self.cardAmount = cardAmount  # cards to be given throughout the game
         self.playerCards = [Game.draw_cards(self.cardAmount) for _ in range(self.playerCount)]
+        # Giving every player cardAmount of random cards
         self.playerTurn = random.randint(0, self.playerCount - 1)
+        # Retrieving a random number to decide which player starts the game
 
+    # Prints out current game score for every player.
     def print_score(self):
         prRed("\nCurrent game stats:\n")
         for playerIndex in range(self.playerCount):
             print(f"Player {playerIndex} has {self.wins[playerIndex]} wins.")
 
+    # Prints out winner if game is over.
     def print_winner(self):
         if self.game_over() != 0:
             print(f"Player {self.game_over()} has won the game!")
         else:
             print(f"You have won the game!")
 
+    # Returns specified amount of random cards.
     @staticmethod
     def draw_cards(amount: int):
         return [Game.draw_card() for _ in range(amount)]
 
+    # Returns a random card.
     @staticmethod
     def draw_card():
         turnout = random.randint(0, 15)
@@ -55,12 +61,14 @@ class Game:
             special = random.choice(possibleSpecials)
             return Card(None, color, special)
 
+    # Returns a random first card to start the game.
     def get_first_card(self):
         firstCard = Game.draw_card()
         while firstCard.get_special() is not None:
             firstCard = Game.draw_card()
         self.currentCard = firstCard
 
+    # Prints out player cards in color.
     def print_player_cards(self):
         numberOfCards = len(self.playerCards[0])
         if numberOfCards > 1:
@@ -80,6 +88,7 @@ class Game:
                 prPurple(card, end=" | ")
         print()
 
+    # Saves high score in filename specified during initialization.
     def save_high_score(self):
         if self.highScore is None or self.wins[0] > self.highScore:
             if not self.beatOldHighScore:
@@ -91,6 +100,7 @@ class Game:
             with open(self.highScoreFilename, 'w') as f:
                 f.write(str(self.wins[0]))
 
+    # Reads high score from filename specified during initialization if exists.
     def read_high_score(self):
         if os.path.exists(self.highScoreFilename):
             with open(self.highScoreFilename, 'r') as f:
@@ -99,6 +109,7 @@ class Game:
                 return high_score
         return None
 
+    # Returns most available color from current player's cards.
     def get_most_available_color(self):
         colorScores = {"blue": 0, "green": 0, "red": 0, "yellow": 0}
         for card in self.playerCards[self.playerTurn]:
@@ -113,6 +124,7 @@ class Game:
 
         return max(colorScores.items(), key=lambda k: k[1])[0]
 
+    # Prints out arg in color of current card.
     def color_print(self, arg):
         color = self.currentCard.get_color()
         if color == "BLUE":
@@ -124,6 +136,7 @@ class Game:
         elif color == "GREEN":
             prGreen(arg)
 
+    # Prints out current card being played in color.
     def print_current_card(self):
         if self.newGame:
             output = f"\nThe first card is {self.currentCard}.\n"
@@ -132,6 +145,7 @@ class Game:
             output = f"\nThe current card is {self.currentCard}.\n"
         self.color_print(output)
 
+    # Validates move given by current player.
     def validate_move(self, card: Card):
         currentColor = self.currentCard.get_color()
         currentValue = self.currentCard.get_value()
@@ -148,6 +162,7 @@ class Game:
         else:
             return False
 
+    # Parses move given by current player.
     def parse_move(self, card: Card, cpu=True):
         self.currentCard = card
         self.playerCards[self.playerTurn].remove(card)
@@ -170,6 +185,7 @@ class Game:
         elif card.get_special() == "SKIP":
             self.get_next_player()
 
+    # Parses a card if any type of draw card is thrown.
     def parse_draw_card(self):
         if "DRAW 4" in self.currentCard.get_special():
             cardsToGive = 4
@@ -182,6 +198,7 @@ class Game:
         else:
             prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
 
+    # Makes a move for computer.
     def get_computer_move(self):
         print(f"Player {self.playerTurn} is thinking...")
         playerIndex = self.playerTurn
@@ -199,6 +216,7 @@ class Game:
         self.playerCards[self.playerTurn].append(Game.draw_card())
         print(f"Player {self.playerTurn} has drawn a card and now has {len(computerCards)} cards.")
 
+    # Retrieves player move.
     def get_player_move(self):
         playerIndex = self.playerTurn
         saidUno = False
@@ -245,12 +263,14 @@ class Game:
                 if not cardExists:
                     print(f"You do not have {playerInput}.\n")
 
+    # Switches game rotation when REVERSE card is thrown.
     def switch_game_rotation(self):
         if self.gameRotation == 1:
             self.gameRotation = -1
         else:
             self.gameRotation = 1
 
+    # Changes playerTurn to next player in queue
     def get_next_player(self):
         if self.gameRotation == 1:
             if self.playerTurn == self.playerCount - 1:
@@ -263,11 +283,13 @@ class Game:
             else:
                 self.playerTurn -= 1
 
+    # Checks if game is over then returns playerIndex of winner
     def game_over(self):
         for playerCards in self.playerCards:
             if len(playerCards) == 0:
                 return self.playerCards.index(playerCards)
 
+    # Prints out startup stuff to simulate cards being shuffled and drawn.
     def startup(self):
         print(f"Players playing: {self.playerCount}")
         print("Shuffling cards...")
@@ -293,6 +315,7 @@ class Game:
         self.get_first_card()
         self.print_current_card()
 
+    # Starts game and keeps looping until game is over.
     def start_game(self):
         self.startup()
         while self.game_over() is None:
@@ -322,12 +345,14 @@ class Game:
             except IndexError:
                 continue
 
+    # Restarts game by resetting some variables back to false.
     def restart_game(self):
         self.playerCards = [Game.draw_cards(self.cardAmount) for _ in range(self.playerCount)]
         self.playerTurn = random.randint(0, self.playerCount - 1)
         self.newGame = True
         self.start_game()
 
+    # Prints out instructions of the game.
     @staticmethod
     def get_instructions():
         prRed("\n\nWelcome to the game of UNO!\nThe rules are extremely simple.")
