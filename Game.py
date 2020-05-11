@@ -124,21 +124,24 @@ class Game:
 
         return max(colorScores.items(), key=lambda k: k[1])[0]
 
+    def color_print(self, arg):
+        color = self.currentCard.get_color()
+        if color == "BLUE":
+            prCyan(arg)
+        elif color == "RED":
+            prRed(arg)
+        elif color == "YELLOW":
+            prYellow(arg)
+        elif color == "GREEN":
+            prGreen(arg)
+
     def print_current_card(self):
         if self.newGame:
             output = f"\nThe first card is {self.currentCard}.\n"
             self.newGame = False
         else:
             output = f"\nThe current card is {self.currentCard}.\n"
-        if self.currentCard.get_color() is not None:
-            if self.currentCard.get_color() == "GREEN":
-                prGreen(output)
-            elif self.currentCard.get_color() == "BLUE":
-                prCyan(output)
-            elif self.currentCard.get_color() == "RED":
-                prRed(output)
-            elif self.currentCard.get_color() == "YELLOW":
-                prYellow(output)
+        self.color_print(output)
 
     def validate_move(self, card: Card):
         currentColor = self.currentCard.get_color()
@@ -200,7 +203,7 @@ class Game:
                 self.parse_move(card)
                 if len(self.playerCards[playerIndex]) == 1:
                     prRed(f"Player {playerIndex} says UNO!")
-                print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards.")
+                self.color_print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards.")
                 return
         self.playerCards[self.playerTurn].append(Game.draw_card())
         print(f"Player {self.playerTurn} has drawn a card and now has {len(computerCards)} cards.")
@@ -236,7 +239,7 @@ class Game:
                             if len(self.playerCards[playerIndex]) == 1 and not saidUno:
                                 prRed("You forgot to say UNO! and you have been given two cards.")
                                 self.playerCards[self.playerTurn] += self.draw_cards(2)
-                            print(f"You have thrown {card}.")
+                            self.color_print(f"You have thrown {card}.")
                             return
                         else:
                             print(f"You cannot throw {card}. Please try again.\n")
