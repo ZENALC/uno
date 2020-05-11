@@ -20,28 +20,6 @@ class Game:
         self.playerCards = [Game.draw_cards(self.cardAmount) for _ in range(self.playerCount)]
         self.playerTurn = random.randint(0, self.playerCount - 1)
 
-    def restart_game(self):
-        self.playerCards = [Game.draw_cards(self.cardAmount) for _ in range(self.playerCount)]
-        self.playerTurn = random.randint(0, self.playerCount - 1)
-        self.newGame = True
-        self.start_game()
-
-    def validate_move(self, card: Card):
-        currentColor = self.currentCard.get_color()
-        currentValue = self.currentCard.get_value()
-        currentSpecial = self.currentCard.get_special()
-
-        if card.get_color() == currentColor and currentColor is not None:
-            return True
-        elif card.get_value() == currentValue and currentValue is not None:
-            return True
-        elif card.get_special() == currentSpecial and currentSpecial is not None:
-            return True
-        elif card.get_special() == "WILD" or card.get_special() == "WILD DRAW 4":
-            return True
-        else:
-            return False
-
     def print_score(self):
         prRed("\nCurrent game stats:\n")
         for playerIndex in range(self.playerCount):
@@ -52,11 +30,6 @@ class Game:
             print(f"Player {self.game_over()} has won the game!")
         else:
             print(f"You have won the game!")
-
-    def game_over(self):
-        for playerCards in self.playerCards:
-            if len(playerCards) == 0:
-                return self.playerCards.index(playerCards)
 
     @staticmethod
     def draw_cards(amount: int):
@@ -167,6 +140,22 @@ class Game:
             elif self.currentCard.get_color() == "YELLOW":
                 prYellow(output)
 
+    def validate_move(self, card: Card):
+        currentColor = self.currentCard.get_color()
+        currentValue = self.currentCard.get_value()
+        currentSpecial = self.currentCard.get_special()
+
+        if card.get_color() == currentColor and currentColor is not None:
+            return True
+        elif card.get_value() == currentValue and currentValue is not None:
+            return True
+        elif card.get_special() == currentSpecial and currentSpecial is not None:
+            return True
+        elif card.get_special() == "WILD" or card.get_special() == "WILD DRAW 4":
+            return True
+        else:
+            return False
+
     def parse_move(self, card: Card, cpu=True):
         self.currentCard = card
         self.playerCards[self.playerTurn].remove(card)
@@ -174,7 +163,6 @@ class Game:
             colorChoice = None
             if cpu:
                 colorChoice = self.get_most_available_color()
-                print(colorChoice)
                 # colorChoice = random.choice(Card.POSSIBLE_COLORS[:-1])
             else:
                 while colorChoice not in Card.POSSIBLE_COLORS[:-1]:
@@ -190,6 +178,18 @@ class Game:
         elif card.get_special() == "SKIP":
             self.get_next_player()
 
+    def parse_draw_card(self):
+        if "DRAW 4" in self.currentCard.get_special():
+            cardsToGive = 4
+        else:
+            cardsToGive = 2
+
+        self.playerCards[self.playerTurn] += self.draw_cards(cardsToGive)
+        if self.playerTurn == 0:
+            prRed(f"You have been given {cardsToGive} cards.")
+        else:
+            prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
+
     def get_computer_move(self):
         print(f"Player {self.playerTurn} is thinking...")
         playerIndex = self.playerTurn
@@ -199,7 +199,7 @@ class Game:
             if self.validate_move(card):
                 self.parse_move(card)
                 if len(self.playerCards[playerIndex]) == 1:
-                    print(f"Player {playerIndex} says UNO!")
+                    prRed(f"Player {playerIndex} says UNO!")
                 print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards.")
                 return
         self.playerCards[self.playerTurn].append(Game.draw_card())
@@ -207,33 +207,42 @@ class Game:
 
     def get_player_move(self):
         playerIndex = self.playerTurn
+        saidUno = False
         while True:
             cardExists = False
             self.print_player_cards()
-            throwCard = " ".join(
-                input("It is your turn. Type a card to throw or 'DRAW' to draw a card>>").upper().split())
+            throwCard = " ".join(input("It is your turn. Type a card to throw, 'UNO' to saw UNO!, "
+                                       "or 'DRAW' to draw a card>>").upper().split())
             if throwCard == "DRAW":
                 drawnCard = self.draw_card()
                 self.playerCards[self.playerTurn].append(drawnCard)
                 print(f"You have drawn {drawnCard}.")
                 return
-            for card in self.playerCards[0]:
-                if throwCard in str(card):
-                    cardExists = True
-                    if throwCard == "WILD" and card.get_special() != "WILD":
-                        cardExists = False
-                        continue
-                    if self.validate_move(card):
-                        self.parse_move(card, cpu=False)
-                        if len(self.playerCards[playerIndex]) == 1:
-                            prBlack(f"You said UNO!")
-                        print(f"You have thrown {card}.")
-                        return
-                    else:
-                        print(f"You cannot throw {card}. Please try again.\n")
-                        break
-            if not cardExists:
-                print(f"You do not have {throwCard}.\n")
+            elif throwCard == "UNO":
+                if saidUno:
+                    prRed("You have already said UNO!")
+                else:
+                    prRed("You said UNO!")
+                    saidUno = True
+            else:
+                for card in self.playerCards[0]:
+                    if throwCard in str(card):
+                        cardExists = True
+                        if throwCard == "WILD" and card.get_special() != "WILD":
+                            cardExists = False
+                            continue
+                        if self.validate_move(card):
+                            self.parse_move(card, cpu=False)
+                            if len(self.playerCards[playerIndex]) == 1 and not saidUno:
+                                prRed("You forgot to say UNO! and you have been given two cards.")
+                                self.playerCards[self.playerTurn] += self.draw_cards(2)
+                            print(f"You have thrown {card}.")
+                            return
+                        else:
+                            print(f"You cannot throw {card}. Please try again.\n")
+                            break
+                if not cardExists:
+                    print(f"You do not have {throwCard}.\n")
 
     def switch_game_rotation(self):
         if self.gameRotation == 1:
@@ -252,6 +261,11 @@ class Game:
                 self.playerTurn = self.playerCount - 1
             else:
                 self.playerTurn -= 1
+
+    def game_over(self):
+        for playerCards in self.playerCards:
+            if len(playerCards) == 0:
+                return self.playerCards.index(playerCards)
 
     def startup(self):
         print(f"Players playing: {self.playerCount}")
@@ -277,18 +291,6 @@ class Game:
 
         self.get_first_card()
         self.print_current_card()
-
-    def parse_draw_card(self):
-        if "DRAW 4" in self.currentCard.get_special():
-            cardsToGive = 4
-        else:
-            cardsToGive = 2
-
-        self.playerCards[self.playerTurn] += self.draw_cards(cardsToGive)
-        if self.playerTurn == 0:
-            prRed(f"You have been given {cardsToGive} cards.")
-        else:
-            prRed(f"Player {self.playerTurn} has been given {cardsToGive} cards.")
 
     def start_game(self):
         self.startup()
@@ -316,6 +318,12 @@ class Game:
                 time.sleep(self.computerThinkTime)
                 self.restart_game()
 
+    def restart_game(self):
+        self.playerCards = [Game.draw_cards(self.cardAmount) for _ in range(self.playerCount)]
+        self.playerTurn = random.randint(0, self.playerCount - 1)
+        self.newGame = True
+        self.start_game()
 
-g = Game(playerCount=2, cardAmount=5, computerThinkTime=0)
+
+g = Game(playerCount=2, cardAmount=1, computerThinkTime=0.5)
 g.start_game()
