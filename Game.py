@@ -55,17 +55,6 @@ class Game:
             special = random.choice(possibleSpecials)
             return Card(None, color, special)
 
-    @staticmethod
-    def print_card():
-        cardLength = 5
-        cardWidth = 8
-        gap = ' '
-        for i in range(cardLength):
-            if i == 0 or i == cardLength - 1:
-                print(cardWidth * "*")
-            else:
-                print('*' + gap * (cardWidth - 2) + '*')
-
     def get_first_card(self):
         firstCard = Game.draw_card()
         while firstCard.get_special() is not None:
