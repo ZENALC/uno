@@ -11,6 +11,7 @@ class Game:
         self.computerThinkTime = computerThinkTime
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
         self.highScore = self.read_high_score()  # read high-score if file exists
+        self.beatOldHighScore = False
         self.newGame = True
         self.currentCard = None
         self.playerCount = playerCount
@@ -119,14 +120,21 @@ class Game:
 
     def save_high_score(self):
         if self.highScore is None or self.wins[0] > self.highScore:
-            print("New high score found! Congratulations!")
+            if not self.beatOldHighScore:
+                print("New high score! Congratulations!")
+            else:
+                print("You are on a streak of high scores! Keep going!")
+            self.beatOldHighScore = True
+            self.highScore = self.wins[0]
             with open(self.highScoreFilename, 'w') as f:
-                f.write("Highest score is: {}".format(str(self.wins[0])))
+                f.write(str(self.wins[0]))
 
     def read_high_score(self):
         if os.path.exists(self.highScoreFilename):
             with open(self.highScoreFilename, 'r') as f:
-                return int(f.read())
+                high_score = int(f.read())
+                print(f"Old high score of {high_score} found.")
+                return high_score
         return None
 
     def print_current_card(self):
@@ -280,9 +288,9 @@ class Game:
 
             self.print_current_card()
             time.sleep(self.computerThinkTime)
-        self.save_high_score()
         self.print_winner()
         self.wins[self.game_over()] += 1
+        self.save_high_score()
         self.print_score()
         playAgain = None
         while playAgain not in ['Y', 'N']:
@@ -293,5 +301,5 @@ class Game:
                 self.restart_game()
 
 
-g = Game(playerCount=3, cardAmount=1, computerThinkTime=0.75)
+g = Game(playerCount=2, cardAmount=1, computerThinkTime=0)
 g.start_game()
