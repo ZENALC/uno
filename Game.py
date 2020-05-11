@@ -325,8 +325,11 @@ class Game:
                 self.get_computer_move()
 
             self.get_next_player()
+
             if self.currentCard.get_special() is not None and "DRAW" in self.currentCard.get_special():
                 self.parse_draw_card()
+            if self.game_over() is not None:
+                break
 
             self.print_current_card()
             time.sleep(self.computerThinkTime)
