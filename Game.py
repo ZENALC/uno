@@ -203,7 +203,7 @@ class Game:
                 self.parse_move(card)
                 if len(self.playerCards[playerIndex]) == 1:
                     prRed(f"Player {playerIndex} says UNO!")
-                self.color_print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards.")
+                self.color_print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} card(s).")
                 return
         self.playerCards[self.playerTurn].append(Game.draw_card())
         print(f"Player {self.playerTurn} has drawn a card and now has {len(computerCards)} cards.")
@@ -214,14 +214,19 @@ class Game:
         while True:
             cardExists = False
             self.print_player_cards()
-            throwCard = " ".join(input("It is your turn. Type a card to throw, 'UNO' to saw UNO!, "
-                                       "or 'DRAW' to draw a card>>").upper().split())
-            if throwCard == "DRAW":
+            playerInput = " ".join(input("It is your turn. Type a card to throw, 'UNO' to saw UNO!, "
+                                         "'HELP' for instructions, 'PRINT' to print the current card,"
+                                         " or 'DRAW' to draw a card>>").upper().split())
+            if playerInput == "DRAW":
                 drawnCard = self.draw_card()
                 self.playerCards[self.playerTurn].append(drawnCard)
                 print(f"You have drawn {drawnCard}.")
                 return
-            elif throwCard == "UNO":
+            elif playerInput == "PRINT":
+                self.print_current_card()
+            elif playerInput == "HELP":
+                Game.get_instructions()
+            elif playerInput == "UNO":
                 if saidUno:
                     prRed("You have already said UNO!")
                 else:
@@ -229,9 +234,9 @@ class Game:
                     saidUno = True
             else:
                 for card in self.playerCards[0]:
-                    if throwCard in str(card):
+                    if playerInput in str(card):
                         cardExists = True
-                        if throwCard == "WILD" and card.get_special() != "WILD":
+                        if playerInput == "WILD" and card.get_special() != "WILD":
                             cardExists = False
                             continue
                         if self.validate_move(card):
@@ -245,7 +250,7 @@ class Game:
                             print(f"You cannot throw {card}. Please try again.\n")
                             break
                 if not cardExists:
-                    print(f"You do not have {throwCard}.\n")
+                    print(f"You do not have {playerInput}.\n")
 
     def switch_game_rotation(self):
         if self.gameRotation == 1:
@@ -327,6 +332,26 @@ class Game:
         self.newGame = True
         self.start_game()
 
+    @staticmethod
+    def get_instructions():
+        prRed("\n\nWelcome to the game of UNO!\nThe rules are extremely simple.")
+        prYellow("The game starts with a random card with some number and some color.")
+        prYellow("Your goal is to match the card with a number or a color and finish all your cards.\n"
+                 "For instance, if the last thrown card is a BLUE 9, you can either throw a card that is BLUE or a "
+                 "card with the number 6.")
+        prCyan("Special cards include WILD cards, REVERSE, DRAW 2, and SKIP.")
+        prCyan("If someone throws a REVERSE card, the rotation of the game changes.\n"
+               "For instance, if the game is going counter-clockwise,"
+               "it will then move clockwise.")
+        prGreen("If a SKIP is thrown, the next player's move will be skipped.")
+        prGreen("If a DRAW 2 is thrown, the next player will draw 2 cards.")
+        prRed("There are two types of wild cards - WILD and WILD DRAW 4.")
+        prRed("With a WILD card - a player can change the color of the game's current card.")
+        prYellow("With a WILD DRAW 4 card, a player can change the color and give 4 cards to the next player.")
+        prGreen("And finally, once a player has two cards, and they are about to throw their second last card, "
+                "\nThey must say UNO, or else they will be given two cards.")
+        prRed("Those are all the rules. Good luck!\n\n")
 
-g = Game(playerCount=2, cardAmount=1, computerThinkTime=0.5)
+
+g = Game(playerCount=3, cardAmount=7, computerThinkTime=0.9)
 g.start_game()
