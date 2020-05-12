@@ -7,7 +7,7 @@ from ColorPrint import *
 
 def configure_defaults():
     while True:
-        print("Would you like to proceed with default settings or configure?")
+        print("Would you like to proceed with default settings or configure? (Default is 7 cards and 3 players)")
         answer = input("Hit enter to proceed with default settings for 'configure' to configure>>").strip().lower()
         if answer == "":
             return True
