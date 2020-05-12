@@ -5,8 +5,57 @@ from Card import Card
 from ColorPrint import *
 
 
+def configure_defaults():
+    while True:
+        print("Would you like to proceed with default settings or configure?")
+        answer = input("Hit enter to proceed with default settings for 'configure' to configure>>").strip().lower()
+        if answer == "":
+            return True
+        elif answer == "configure":
+            return False
+        else:
+            print("I did not understand that. Please try again>>")
+
+
+def get_card_count():
+    while True:
+        try:
+            cardCount = int(input("How many cards would you like to play with? Type>>"))
+            if cardCount < 0:
+                print("Game cannot have less than 0 cards.")
+                continue
+            elif cardCount > 10000:
+                print("Game currently does not support more than 10,000 cards.")
+                continue
+            else:
+                return cardCount
+        except ValueError:
+            print("Please type in a valid number.")
+
+
+def get_player_count():
+    while True:
+        try:
+            otherPlayerCount = int(input("How many players would you like to play against? Type>>"))
+            if otherPlayerCount < 0:
+                print("Game cannot have less than 0 opponents.")
+                continue
+            elif otherPlayerCount > 10000:
+                print("Game currently does not support more than 10,000 players.")
+                continue
+            else:
+                return otherPlayerCount + 1  # + 1 because player is also a player
+        except ValueError:
+            print("Please type in a valid number.")
+
+
 class Game:
     def __init__(self, playerCount=2, cardAmount=7, gameRotation=1, computerThinkTime=1.0):
+        if playerCount <= 0:
+            raise ValueError("You cannot have less than one player in the game.")
+        if cardAmount < 0:
+            raise ValueError("You cannot have less than zero cards in the game.")
+
         self.highScoreFilename = "high_score.txt"  # default file name that contains high score
         self.computerThinkTime = computerThinkTime  # default time.sleep() time to simulate computer thinking
         self.gameRotation = gameRotation  # 1 is clock-wise, -1 is counter-clock-wise
@@ -211,7 +260,8 @@ class Game:
                     self.color_print(f"Player {playerIndex} says UNO!")
                     self.color_print(f"Player {playerIndex} has thrown {card} and now has 1 card left.")
                 else:
-                    self.color_print(f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards left.")
+                    self.color_print(
+                        f"Player {playerIndex} has thrown {card} and now has {len(computerCards)} cards left.")
                 return
         self.playerCards[self.playerTurn].append(Game.draw_card())
         print(f"Player {self.playerTurn} has drawn a card and now has {len(computerCards)} cards.")
@@ -377,5 +427,13 @@ class Game:
         prRed("Those are all the rules. Good luck!\n\n")
 
 
-g = Game(playerCount=3, cardAmount=2, computerThinkTime=0.9)
-g.start_game()
+if __name__ == "__main__":
+    configureDefaults = configure_defaults()
+    if not configureDefaults:
+        totalPlayers = get_player_count()
+        totalCards = get_card_count()
+    else:
+        totalPlayers = 3
+        totalCards = 7
+    g = Game(playerCount=totalPlayers, cardAmount=totalCards, computerThinkTime=0.9)
+    g.start_game()
