@@ -6,13 +6,19 @@ from ColorPrint import *
 
 
 def configure_defaults():
+    defaultCards = 7
+    defaultPlayers = 3
+
     while True:
-        print("Would you like to proceed with default settings or configure? (Default is 7 cards and 3 players)")
+        print(f"Would you like to proceed with default settings or configure? "
+              f"(Default is {defaultCards} cards and {defaultPlayers} players)")
         answer = input("Hit enter to proceed with default settings for 'configure' to configure>>").strip().lower()
         if answer == "":
-            return True
+            return defaultPlayers, defaultCards
         elif answer == "configure":
-            return False
+            players = get_player_count()
+            cards = get_card_count()
+            return players, cards
         else:
             print("I did not understand that. Please try again>>")
 
@@ -74,8 +80,12 @@ class Game:
     # Prints out current game score for every player.
     def print_score(self):
         prRed("\nCurrent game stats:\n")
+        print(f"Your high score is {self.highScore}.\n")
         for playerIndex in range(self.playerCount):
-            print(f"Player {playerIndex} has {self.wins[playerIndex]} wins.")
+            if playerIndex == 0:
+                print(f"You have {self.wins[playerIndex]} wins.")
+            else:
+                print(f"Player {playerIndex} has {self.wins[playerIndex]} wins.")
 
     # Prints out winner if game is over.
     def print_winner(self):
@@ -428,12 +438,6 @@ class Game:
 
 
 if __name__ == "__main__":
-    configureDefaults = configure_defaults()
-    if not configureDefaults:
-        totalPlayers = get_player_count()
-        totalCards = get_card_count()
-    else:
-        totalPlayers = 3
-        totalCards = 7
+    totalPlayers, totalCards = configure_defaults()
     g = Game(playerCount=totalPlayers, cardAmount=totalCards, computerThinkTime=0.9)
     g.start_game()
